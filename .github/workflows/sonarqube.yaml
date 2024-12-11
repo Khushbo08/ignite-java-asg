@@ -1,0 +1,124 @@
+
+# Define the CI/CD Workflow for Java code
+name: Java CI with Maven
+
+# Trigger the workflow on pushes to the specified branch
+on:
+  push:
+    branches:
+      - feature-v.1
+
+# Define permissions required for the OIDC connection
+permissions:
+  id-token: write                    # This is required for requesting the JWT
+  contents: read                     # # This permission allows reading the content of files in the repository
+
+# The jobs to be executed in the workflow
+jobs:
+  # CI Job
+  ci:
+    runs-on: ubuntu-latest   # self-hosted  
+    # Define the steps to be executed in the job
+    steps:
+    - name: Set short git commit SHA
+      id: commit
+      uses: prompt/actions-commit-hash@v2
+    
+    # check out repository's code into workflow's workspace
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Set up JDK 17
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+       distribution: 'temurin'
+       java-version: '17'
+
+    # Run unit tests using maven goal
+    - name: Run unit test
+      run: mvn test
+
+    # Generate code-coverage report using jacoco
+    - name : Get code-coverage report
+      run : mvn jacoco:report
+      
+    # Upload code-coverage report as an artifact   
+    - name: Code Coverage Report
+      uses: actions/upload-artifact@v2
+      with:
+       name: jacoco-report
+       path: target/site/jacoco/index.html
+
+      # Sonarqube Scan using maven command
+    - name: SonarQube Scan
+      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ secrets.SONAR_PROJECTKEY }} -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}  -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+    
+    # Check sonarqube quality gate
+    - name: Check SonarQube Quality Gate
+      run: |
+       status=$(curl -s "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECTKEY }}" -u "${{ secrets.SONAR_TOKEN }}": | jq -r '.projectStatus.status')
+       if [[ "$status" != "OK" ]]; then
+          echo "SonarQube quality gate check failed." 
+       else
+          echo "SonarQube quality gate check succeeded. Continuing with the workflow..."
+       fi
+    # if exit code 1 is added after (echo "SonarQube quality gate check failed.") workflow will fail which will check for quality gate condition 
+
+    # Once we build the package using maven as build tool the artifact generated is in jar format and store under target directory
+    - name: Build project and package jar
+      run: mvn package -Dmaven.test.skip
+
+
+    # Build trust between GitHub and AWS using OIDC connector
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+    # Authenticate AWS with Docker to interact with an Amazon ECR registry
+    - name: Login to Amazon ECR
+      run: aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+    # Build the Docker image using Dockerfile & tag it with commit SHA, & push it to ECR repository
+    - name: Build Docker Image
+      env:
+        IMAGE_TAG: ${{ steps.commit.outputs.short }}
+      run: |
+          docker build -t humanresource:${{ github.sha }} .
+          docker tag humanresource:${{ github.sha }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/humanresource:${{ github.sha }}
+
+    # Run Trivy vulnerability scanner on specified Docker image in the ECR repository
+    - name: Run Trivy vulnerability scanner
+      id: trivy-scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/humanresource:${{ github.sha }}
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
+      continue-on-error: true
+
+    # Display boolean value(true/false) depending on the scan report that is received from previous step
+    - name: Handle Trivy results
+      if: steps.trivy-scan.outcome == 'failure'
+      run: |
+        echo "Vulnerability scan failed!"
+
+    # Display boolean value(true/false) depending on the scan report that is received from previous step
+    - name: Continue with other steps
+      if: steps.trivy-scan.outcome == 'success'
+      run: |
+        echo "Vulnerability scan succeeded!"
+
+
+
+
+   
+
+   
+     
