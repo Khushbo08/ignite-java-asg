@@ -1,0 +1,15 @@
+version: 0.0
+os: linux
+files:
+  - source: /target/*.jar
+    destination: /home/ubuntu/app.jar
+hooks:
+  BeforeInstall:
+    - location: scripts/before_install.sh
+      runas: ubuntu
+  AfterInstall:
+    - location: scripts/after_install.sh
+      runas: ubuntu
+  ApplicationStart:
+    - location: scripts/start_application.sh
+      runas: ubuntu
