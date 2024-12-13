@@ -1,19 +1,22 @@
 version: 0.0
 os: linux
 files:
-  - source: target/*.jar
-    destination: /home/ubuntu/app/app.jar
-  - source: scripts/
-    destination: /home/ubuntu/
+  # - source: target/*.jar
+  #   destination: /home/ubuntu/app/app.jar
+  # - source: scripts/
+  #   destination: /home/ubuntu/
     #destination: /home/ubuntu/scripts/ 
+
+  - source: ./
+    destination: /home/ubuntu/ignite-java-asg
  
 hooks:
   BeforeInstall:
-    - location: /home/ubuntu/scripts/setup.sh
+    - location: /home/ubuntu/ignite-java-asg/scripts/setup.sh
       runas: root
       timeout: 300
  
   AfterInstall:
-    - location: /home/ubuntu/scripts/run_jar.sh
+    - location: /home/ubuntu/ignite-java-asg/scripts/run_jar.sh
       runas: root
       timeout: 300
