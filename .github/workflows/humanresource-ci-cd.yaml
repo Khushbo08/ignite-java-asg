@@ -85,10 +85,15 @@ jobs:
       - name: Create deployment
         run: |
           aws deploy create-deployment \
-            --application-name "ignite-app" \
-            --deployment-group-name "ignite-DG" \
-            --revision revisionType=GitHub,gitHubLocation={repository=Khushbo08/ignite-java-asg,commitId=${GITHUB_SHA}} \
-            --description "GitHub Actions deployment"
+            --application-name "ignite-app-demo" \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name "ignite-DG-demo" \
+            --description "My GitHub deployment demo" \
+            --revision=${GITHUB_SHA}} \
+            --github-location repository="Khushbo08/ignite-java-asg",commitId=${GITHUB_SHA}} 
+          
+
+
 
       # - id: deploy
       #   uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
