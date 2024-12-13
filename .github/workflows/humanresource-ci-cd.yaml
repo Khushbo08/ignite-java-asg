@@ -35,16 +35,16 @@ jobs:
     - name: Run unit test
       run: mvn test -DskipTests
 
-    # # Generate code-coverage report using jacoco
-    # - name : Get code-coverage report
-    #   run : mvn jacoco:report
+    # Generate code-coverage report using jacoco
+    - name : Get code-coverage report
+      run : mvn jacoco:report
       
-    # # Upload code-coverage report as an artifact   
-    # - name: Code Coverage Report
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #    name: jacoco-report
-    #    path: target/site/jacoco/index.html
+    # Upload code-coverage report as an artifact   
+    - name: Code Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+       name: jacoco-report
+       path: target/site/jacoco/index.html
 
     # Once we build the package using maven as build tool the artifact generated is in jar format and store under target directory
     - name: Build project and package jar
@@ -86,6 +86,9 @@ jobs:
         uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
         with:
               application: ignite-app
+              deploymentGroupName: ignite-DG
+              githubToken: ${{ secrets.CODEDEPLOY_TOKEN }}  # GitHub token for artifact access
+              artifactName: app-jar
       - name : Create Code Deploy
         uses: peter-evans/commit-comment@v2
         with:
