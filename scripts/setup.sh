@@ -1,7 +1,7 @@
 #!/bin/bash
  
 # Ensure the app folder exists
-mkdir -p /home/ubuntu/ignite-java-asg
+mkdir -p /home/ubuntu/ignite-java-asg/scripts
  
 # Ensure the script has execution permissions
 chmod +x /home/ubuntu/ignite-java-asg/scripts/run_jar.sh
