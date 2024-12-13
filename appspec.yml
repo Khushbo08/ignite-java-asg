@@ -7,8 +7,10 @@ files:
   #   destination: /home/ubuntu/
     #destination: /home/ubuntu/scripts/ 
 
-  - source: ./
-    destination: /home/ubuntu/ignite-java-asg
+  - source: ./scripts
+    destination: /home/ubuntu/ignite-java-asg/scripts
+  - source: target/Employee-Management-System-0.0.1-SNAPSHOT.jar
+    destination: /home/ubuntu/ignite-java-asg  
  
 hooks:
   BeforeInstall:
