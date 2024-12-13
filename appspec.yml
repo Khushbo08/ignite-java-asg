@@ -17,6 +17,6 @@ hooks:
       timeout: 300
  
   AfterInstall:
-    - location: /home/ubuntu/ignite-java-asg/scripts/run_jar.sh
+    - location: scripts/run_jar.sh
       runas: root
       timeout: 300
