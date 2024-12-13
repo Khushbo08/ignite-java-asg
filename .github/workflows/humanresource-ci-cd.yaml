@@ -76,12 +76,12 @@ jobs:
       - name : List directory
         run : ls -al 
     # Build trust between GitHub and AWS using OIDC connector
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v3
+      - name: "Configure AWS Credentials" 
+        uses: aws-actions/configure-aws-credentials@v4.0.2
         with:
-            role-to-assume: ${{ secrets.AWS_IAM_ARN }}
-            role-session-name: samplerolesession
-            aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
       - id: deploy
         uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
         with:
