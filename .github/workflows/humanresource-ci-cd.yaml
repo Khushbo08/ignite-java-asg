@@ -87,8 +87,6 @@ jobs:
         with:
               application: ignite-app
               deploymentGroupName: ignite-DG
-              githubToken: ${{ secrets.CODEDEPLOY_TOKEN }}  # GitHub token for artifact access
-              artifactName: app-jar
       - name : Create Code Deploy
         uses: peter-evans/commit-comment@v2
         with:
