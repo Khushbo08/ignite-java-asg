@@ -89,7 +89,6 @@ jobs:
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --deployment-group-name "ignite-DG-demo" \
             --description "My GitHub deployment demo" \
-            --revision=${GITHUB_SHA}} \
             --github-location repository="Khushbo08/ignite-java-asg",commitId=${GITHUB_SHA}} 
           
 
