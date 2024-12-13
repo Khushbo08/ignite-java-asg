@@ -61,13 +61,7 @@ jobs:
         name: application-jar
         path: target/*.jar
     
-    # Build trust between GitHub and AWS using OIDC connector
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v3
-      with:
-          role-to-assume: ${{ secrets.AWS_IAM_ARN }}
-          role-session-name: samplerolesession
-          aws-region: ${{ secrets.AWS_REGION }}
+
     
   # CD job
   Deploy:
@@ -79,54 +73,24 @@ jobs:
       # Checkout the repository
       - name: Checkout code      
         uses: actions/checkout@v4
-
-      - name: Download JAR Artifact
-        uses: actions/download-artifact@v3
+      - name : List directory
+        run : ls -al 
+    # Build trust between GitHub and AWS using OIDC connector
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          name: application-jar
-          path: ./target
-
-      # Create known_hosts file inside SSH directory 
-      - name: Create SSH directory and known_hosts file
-        run: |
-            mkdir -p ~/.ssh
-            touch ~/.ssh/known_hosts
-
-      # Add private key to id_rsa for ssh authentication
-      - name: Add SSH private key
-        run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        shell: bash
-
-      # Grant read-write permission to id_rsa
-      - name: Set proper permissions for the private key
-        run: chmod 600 ~/.ssh/id_rsa
-
-      # Install SSH Client
-      - name: Install SSH Client
-        run: sudo apt-get install -y openssh-client 
-
-      # Add the EC2 instance to known_hosts
-      - name: Add EC2 instance to known_hosts
-        run: ssh-keyscan -H ${{ secrets.INSTANCE_PUBLIC_IP }} >> ~/.ssh/known_hosts
-
-      # Copy the JAR file to the EC2 instance
-      - name: Copy JAR to EC2
-        run: |
-         scp -i ~/.ssh/id_rsa target/*.jar ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }}:/home/ubuntu/app.jar
-
-      # Start the application on EC2
-      - name: Start Application on EC2
-        run: |
-          ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }} "nohup java -jar /home/ubuntu/app.jar > app.log 2>&1 &"
-            
-
-
-
-#       # ssh-keyscan: This is the command-line utility used to gather public host keys from a specified host. In this case, it's scanning the host specified by the value of the INSTANCE_PUBLIC_IP secret.
-#       # -H: This option hashes the hostnames and addresses in the output. It's a security measure to avoid exposing the actual host information in the known_hosts file.
-#       # >> ~/.ssh/known_hosts: This part of the command appends the output of the ssh-keyscan command to the known_hosts file in the SSH directory (~/.ssh). The >> operator is used for appending to a file.
-
-#       # ssh: This is the command to establish an SSH connection.
-#       # -i ~/.ssh/id_rsa: This option specifies the identity file to be used for authentication. In this case, it points to the private key file ~/.ssh/id_rsa.
-#       # ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }}: This is the SSH connection string. It specifies the username (ubuntu) and the host to connect to, which is likely retrieved from the INSTANCE_PUBLIC_IP secret.
-
+            role-to-assume: ${{ secrets.AWS_IAM_ARN }}
+            role-session-name: samplerolesession
+            aws-region: ${{ secrets.AWS_REGION }}
+      - id: deploy
+        uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
+        with:
+              application: ignite-app
+      - name : Create Code Deploy
+        uses: peter-evans/commit-comment@v2
+        with:
+              application: ignite-app
+              token: ${{ secrets.CODEDEPLOY_TOKEN }}
+              body: |
+                    @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
+    
