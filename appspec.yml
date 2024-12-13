@@ -1,13 +1,17 @@
 version: 0.0
 os: linux
 files:
-  - source: ./
-    destination: /home/ec2-user/ignite-java-asg
-    overwrite: true
-file_exists_behavior: OVERWRITE
-branch_config:
-    main:
-        deploymentGroupName: ignite-DG
-        deploymentGroupConfig:
-            serviceRoleArn: arn:aws:iam::920726643262:role/ignite-code-deploy-role
-
+  - source: target/*.jar
+    destination: /home/ubuntu/app/app.jar
+  - source: scripts/
+    destination: /home/ubuntu/scripts/
+    #destination: /home/ubuntu/scripts/ 
+ 
+hooks:
+  BeforeInstall:
+    - location: /home/ubuntu/scripts/setup.sh
+      timeout: 300
+ 
+  AfterInstall:
+    - location: /home/ubuntu/scripts/run_jar.sh
+      timeout: 300
