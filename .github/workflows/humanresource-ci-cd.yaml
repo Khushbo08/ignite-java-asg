@@ -82,16 +82,24 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-      - id: deploy
-        uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
-        with:
-              application: ignite-app
-              deploymentGroupName: ignite-DG
-      - name : Create Code Deploy
-        uses: peter-evans/commit-comment@v2
-        with:
-              application: ignite-app
-              token: ${{ secrets.CODEDEPLOY_TOKEN }}
-              body: |
-                    @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
+      - name: Create deployment
+        run: |
+          aws deploy create-deployment \
+            --application-name "ignite-app" \
+            --deployment-group-name "ignite-DG" \
+            --revision revisionType=GitHub,gitHubLocation={repository=Khushbo08/ignite-java-asg,commitId=${GITHUB_SHA}} \
+            --description "GitHub Actions deployment"
+
+      # - id: deploy
+      #   uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
+      #   with:
+      #         application: ignite-app
+      #         deploymentGroupName: ignite-DG
+      # - name : Create Code Deploy
+      #   uses: peter-evans/commit-comment@v2
+      #   with:
+      #         application: ignite-app
+      #         token: ${{ secrets.CODEDEPLOY_TOKEN }}
+      #         body: |
+      #               @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
     
