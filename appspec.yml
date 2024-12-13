@@ -4,7 +4,7 @@ files:
   - source: target/*.jar
     destination: /home/ubuntu/app/app.jar
   - source: scripts/
-    destination: /home/ubuntu/scripts/
+    destination: /home/ubuntu/
     #destination: /home/ubuntu/scripts/ 
  
 hooks:
