@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source: target/*.jar
-    destination: /home/ubuntu/ignite-java-asg
+    destination: /home/ec2-user/ignite-java-asg
 
 hooks:
   BeforeInstall:
