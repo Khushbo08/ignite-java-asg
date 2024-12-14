@@ -1,114 +1,87 @@
+name: Java CI/CD with Maven and CodeDeploy
 
-# Define the CI/CD Workflow for Java code
-name: Java CI with Maven
-
-# Trigger the workflow on pushes to the specified branch
 on:
   push:
     branches:
-      - main
+      - feature/codedeploy
 
-# Define permissions required for the OIDC connection
 permissions:
-  id-token: write                    # This is required for requesting the JWT
-  contents: read                     # # This permission allows reading the content of files in the repository
+  id-token: write
+  contents: read
 
-# The jobs to be executed in the workflow
 jobs:
   # CI Job
   ci:
-    runs-on: ubuntu-latest     
-    # Define the steps to be executed in the job
-    steps:
-    # check out repository's code into workflow's workspace
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    # Set up JDK 17
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-       distribution: 'temurin'
-       java-version: '17'
-
-    # Run unit tests using maven goal
-    - name: Run unit test
-      run: mvn test -DskipTests
-
-    # Generate code-coverage report using jacoco
-    - name : Get code-coverage report
-      run : mvn jacoco:report
-      
-    # Upload code-coverage report as an artifact   
-    - name: Code Coverage Report
-      uses: actions/upload-artifact@v3
-      with:
-       name: jacoco-report
-       path: target/site/jacoco/index.html
-
-    # Once we build the package using maven as build tool the artifact generated is in jar format and store under target directory
-    - name: Build project and package jar
-      run: mvn package -Dmaven.test.skip
-
-    # List files in target directory to confirm JAR file exists
-    - name: List files in target directory
-      run: ls -al target
-
-    # Upload the JAR as an artifact
-    - name: Upload JAR Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: application-jar
-        path: target/*.jar
-    
-
-    
-  # CD job
-  Deploy:
-    needs: ci                
-    name: Deploy to EC2
     runs-on: ubuntu-latest
-  
+
     steps:
-      # Checkout the repository
-      - name: Checkout code      
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run unit tests
+        run: mvn test
+
+      - name: Generate code-coverage report
+        run: mvn jacoco:report
+
+      - name: Upload code-coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/index.html
+
+      - name: Build project and package jar
+        run: mvn package -Dmaven.test.skip
+
+      - name: List files in target directory
+        run: ls -al target
+
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: application-jar
+          path: target/*.jar
+
+  # CD Job
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Download JAR Artifact
         uses: actions/download-artifact@v3
         with:
-           name: application-jar
-           path: ./target
+          name: application-jar
+          path: ./target
 
-    # Build trust between GitHub and AWS using OIDC connector
-      - name: "Configure AWS Credentials" 
-        uses: aws-actions/configure-aws-credentials@v4.0.2
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-      - name: Create deployment
+
+      - name: Install required dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y openjdk-17-jdk
+
+      - name: Deploy using CodeDeploy
         run: |
           aws deploy create-deployment \
             --application-name "ignite-app" \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --deployment-group-name "ignite-DG" \
-            --description "My GitHub deployment demo" \
+            --description "Deployment from GitHub Actions" \
             --github-location repository=Khushbo08/ignite-java-asg,commitId=${GITHUB_SHA}
-          
-
-
-
-      # - id: deploy
-      #   uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
-      #   with:
-      #         application: ignite-app
-      #         deploymentGroupName: ignite-DG
-      # - name : Create Code Deploy
-      #   uses: peter-evans/commit-comment@v2
-      #   with:
-      #         application: ignite-app
-      #         token: ${{ secrets.CODEDEPLOY_TOKEN }}
-      #         body: |
-      #               @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
-    
+            --bundle-type jar \
+            --file-exists-behavior OVERWRITE \
+            --artifact-store ./target/*.jar
