@@ -88,6 +88,4 @@ jobs:
             --deployment-group-name "ignite-DG" \
             --description "Deployment from GitHub Actions" \
             --github-location repository=Khushbo08/ignite-java-asg,commitId=${GITHUB_SHA}
-            --bundle-type jar \
-            --file-exists-behavior OVERWRITE \
             --artifact-store ./target/*.jar
