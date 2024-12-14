@@ -7,8 +7,13 @@ files:
   #   destination: /home/ubuntu/
     #destination: /home/ubuntu/scripts/ 
 
-  - source: ./
-    destination: /home/ec2-user/ignite-java-asg
+  - source: target/*.jar
+    destination: /home/ubuntu/app.jar
+  - source: scripts/
+    destination: /home/ubuntu/ignite-java-asg/scripts/
+
+  # - source: ./
+  #   destination: /home/ec2-user/ignite-java-asg
  
 hooks:
   BeforeInstall:
