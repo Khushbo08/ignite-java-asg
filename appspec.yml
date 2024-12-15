@@ -1,9 +1,9 @@
 version: 0.0
 os: linux
 
-files:
-  - source: build/Employee-Management-System-0.0.1-SNAPSHOT.jar
-    destination: /home/ubuntu/
+ files:
+#   - source: build/Employee-Management-System-0.0.1-SNAPSHOT.jar
+#     destination: /home/ubuntu/
 
   - source: scripts/
     destination: /home/ubuntu/
