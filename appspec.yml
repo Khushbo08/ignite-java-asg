@@ -5,10 +5,10 @@ files:
   - source: build/Employee-Management-System-0.0.1-SNAPSHOT.jar
     destination: /home/ubuntu/
 
-  - source: /scripts/
+  - source: scripts/
     destination: /home/ubuntu/
 
-  - source: /appspec.yml
+  - source: appspec.yml
     destination: /home/ubuntu/
 
 permissions:
