@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 
 files:
-  - source: /build/application.jar
+  - source: Employee-Management-System-0.0.1-SNAPSHOT.jar
     destination: /home/ubuntu/
 
   - source: /scripts/
@@ -12,7 +12,7 @@ files:
     destination: /home/ubuntu/
 
 permissions:
-  - object: /home/ubuntu/application.jar
+  - object: /home/ubuntu/Employee-Management-System-0.0.1-SNAPSHOT.jar
     owner: ubuntu
     group: ubuntu
     mode: 755
