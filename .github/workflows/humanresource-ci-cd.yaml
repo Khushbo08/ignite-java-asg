@@ -83,8 +83,8 @@ jobs:
         run: |
           zip -r my-app.zip appspec.yml scripts/ build/Employee-Management-System-0.0.1-SNAPSHOT.jar
 
-      - name: List contents of the zip file
-        run: unzip -l my-app.zip
+      # - name: List contents of the zip file
+      #   run: unzip -l my-app.zip
 
       
       - name: Deploy using CodeDeploy
