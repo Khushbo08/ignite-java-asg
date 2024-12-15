@@ -2,8 +2,8 @@ version: 0.0
 os: linux
 
 files:
-  - source: ./
-    destination: /home/ubuntu/ignite-java-asg
+  - source: ./target/*.jar
+    destination: /home/ubuntu/
 
 hooks:
   BeforeInstall:
