@@ -2,8 +2,20 @@ version: 0.0
 os: linux
 
 files:
-  - source: target/application.jar
+  - source: /build/application.jar
     destination: /home/ubuntu/
+
+  - source: /scripts/
+    destination: /home/ubuntu/
+
+  - source: /appspec.yml
+    destination: /home/ubuntu/
+
+permissions:
+  - object: /home/ubuntu/application.jar
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
 
 hooks:
   BeforeInstall:
