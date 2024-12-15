@@ -79,7 +79,11 @@ jobs:
       - name: Create deployment package
         run: |
           zip -r my-app.zip appspec.yml scripts/ build/application.jar
-          
+
+      - name: List contents of the zip file
+        run: unzip -l my-app.zip
+
+      
       - name: Deploy using CodeDeploy
         run: |
           aws deploy create-deployment \
