@@ -61,7 +61,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: application-jar
-          path: ./target
+          path: ./build
 
     # Build trust between GitHub and AWS using OIDC connector
       - name: "Configure AWS Credentials" 
@@ -78,8 +78,8 @@ jobs:
 
       - name: Create deployment package
         run: |
-          zip -r my-app.zip appspec.yml scripts/ target/*.jar
-
+          zip -r my-app.zip appspec.yml scripts/ build/application.jar
+          
       - name: Deploy using CodeDeploy
         run: |
           aws deploy create-deployment \
