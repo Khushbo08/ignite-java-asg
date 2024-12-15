@@ -3,7 +3,7 @@ name: Java CI/CD with Maven and CodeDeploy
 on:
   push:
     branches:
-      - feature/codedeploy
+      - feature/ec2asg-jar
 
 permissions:
   id-token: write
