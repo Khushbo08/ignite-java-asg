@@ -90,6 +90,7 @@ jobs:
             --description "Deployment from GitHub Actions" \
             --ignore-application-stop-failures \
             --file-exists-behavior OVERWRITE \
+            --region us-east-1 \
             --github-location repository=Khushbo08/ignite-java-asg,commitId=${{ github.sha }}
 
 
