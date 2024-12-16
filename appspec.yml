@@ -11,11 +11,7 @@ os: linux
    - source: /appspec.yml
      destination: /home/ubuntu/
 
-permissions:
-  - object: /home/ubuntu/Employee-Management-System-0.0.1-SNAPSHOT.jar
-    owner: ubuntu
-    group: ubuntu
-    mode: 755
+
 
 hooks:
   BeforeInstall:
