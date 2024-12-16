@@ -40,15 +40,19 @@ jobs:
       - name: Build project and package jar
         run: mvn package -Dmaven.test.skip
 
+      # - name: Create deployment package
+      #   run: |
+      #     mkdir deployment
+      #     cp appspec.yml scripts/* target/Employee-Management-System-0.0.1-SNAPSHOT.jar ./deployment/
+      #     cd deployment
+      #     zip -r my-app.zip ./*
+
       - name: Create deployment package
         run: |
-          mkdir deployment
-          cp appspec.yml scripts/* target/Employee-Management-System-0.0.1-SNAPSHOT.jar ./deployment/
-          cd deployment
-          zip -r my-app.zip ./*
+          zip -r my-app.zip appspec.yml scripts/ build/Employee-Management-System-0.0.1-SNAPSHOT.jar
 
       - name: List contents of the zip file
-        run: unzip -l deployment/my-app.zip
+        run: unzip -l my-app.zip
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4.0.2
@@ -59,7 +63,7 @@ jobs:
 
       - name: Upload Deployment Package to S3
         run: |
-          aws s3 cp deployment/my-app.zip s3://ignite-jar-bucket/my-app.zip
+          aws s3 cp my-app.zip s3://ignite-jar-bucket/my-app.zip
 
   # CD Job
   deploy:
