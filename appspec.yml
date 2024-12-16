@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 
  files:
-   - source: Employee-Management-System-0.0.1-SNAPSHOT.jar
+   - source: s3://ignite-jar-bucket/my-app.zip
      destination: /home/ubuntu/
 
    - source: /scripts/
