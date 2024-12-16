@@ -3,7 +3,7 @@ name: Java CI/CD with Maven and CodeDeploy (S3)
 on:
   push:
     branches:
-      - feature/jar-to-s3-new-2
+      - feature/jar-to-s3-new-3
 
 permissions:
   id-token: write
