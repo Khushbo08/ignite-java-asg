@@ -3,7 +3,7 @@ name: Java CI/CD with Maven and CodeDeploy (No S3)
 on:
   push:
     branches:
-      - feature/ec2asg-jar
+      - feature/jar-to-s3-new
 
 permissions:
   id-token: write
