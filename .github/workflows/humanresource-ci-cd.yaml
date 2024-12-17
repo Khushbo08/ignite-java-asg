@@ -3,7 +3,7 @@ name: Java CI/CD with Maven and CodeDeploy (S3)
 on:
   push:
     branches:
-      - feature/jar-to-s3-new-3
+      - feature/jar-s3-oidc
 
 permissions:
   id-token: write
@@ -46,12 +46,13 @@ jobs:
       - name: List contents of the zip file
         run: unzip -l my-app.zip
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.2
+    # Build trust between GitHub and AWS using OIDC connector
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v3
         with:
+          role-to-assume: ${{ secrets.AWS_IAM_ARN }}
+          role-session-name: samplerolesession
           aws-region: ${{ secrets.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
 
       - name: Upload Deployment Package to S3
         run: |
@@ -63,12 +64,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.2
+    # Build trust between GitHub and AWS using OIDC connector
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v3
         with:
+          role-to-assume: ${{ secrets.AWS_IAM_ARN }}
+          role-session-name: samplerolesession
           aws-region: ${{ secrets.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
 
       - name: Deploy using CodeDeploy
         run: |
